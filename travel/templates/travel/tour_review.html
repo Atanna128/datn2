@@ -11,13 +11,16 @@
             <div class="col-lg-8 posts-list">
                 <div class="single-post">
                     <div class="feature-img">
-                        <img class="img-fluid" src="{{ review.picture.url }}" alt="">
+                        {% with review.tour.image_set.all|first as image %}
+                        <img class="img-fluid" src="../../../media/{{ image.url }}" alt="">
+                        {% endwith %}
                     </div>
                     <div class="blog_details">
                         <h2>{{ review.title }}
                         </h2>
                         <ul class="blog-info-link mt-3 mb-4">
-                            <li><a href="#"><i class="fa fa-user"></i>{{ review.tour.title }}</a></li>
+                            <li><a href="{{ review.tour.get_absolute_url }}"><i class="fa fa-user"></i>{{ review.tour.title }}</a></li>
+
                             <li><a href="#"><i class="fa fa-comments"></i>{{ comment_parent_list.count }}</a></li>
                         </ul>
                         <p class="excert">{{ review.content }}
@@ -107,75 +110,52 @@
 
             </div>
             <div class="col-lg-4">
-                <div class="blog_right_sidebar ">
-                    <aside class="single_sidebar_widget search_widget">
-                        <form action="#">
-                            <div class="form-group">
-                                <div class="input-group mb-3">
-                                    <input type="text" class="form-control" placeholder='Search Keyword'
-                                        onfocus="this.placeholder = ''" onblur="this.placeholder = 'Search Keyword'">
-                                    <div class="input-group-append">
-                                        <button class="btn" type="button"><i class="ti-search"></i></button>
+                    <div class="blog_right_sidebar ">
+                        <aside class="single_sidebar_widget search_widget">
+                            <form action="#">
+                                <div class="form-group">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" placeholder='Search Keyword'
+                                               onfocus="this.placeholder = ''"
+                                               onblur="this.placeholder = 'Search Keyword'">
+                                        <div class="input-group-append">
+                                            <button class="btn" type="button"><i class="ti-search"></i></button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <button class="button rounded-0 primary-bg text-white w-100 btn_1 boxed-btn"
-                                type="submit">{% trans 'Search' %}
-                            </button>
-                        </form>
-                    </aside>
-                    <aside class="single_sidebar_widget post_category_widget">
-                        <h4 class="widget_title">{% trans 'Category' %}</h4>
-                        <ul class="list cat-list">
-                            <li>
-                                <a href="#" class="d-flex">
-                                    <p>{% trans 'Resaurant food' %}</p>
-                                    <p>(37)</p>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="d-flex">
-                                    <p>{% trans 'Travel news' %}</p>
-                                    <p>(10)</p>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="d-flex">
-                                    <p>{% trans 'Travel abroad' %}</p>
-                                    <p>(03)</p>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="d-flex">
-                                    <p>{% trans 'domestic tourism' %}</p>
-                                    <p>(11)</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </aside>
-                    <aside class="single_sidebar_widget tag_cloud_widget">
-                        <h4 class="widget_title">{% trans 'Tag Clouds' %}</h4>
-                        <ul class="list">
-                            <li>
-                                <a href="#">{% trans 'Ha Long' %}</a>
-                            </li>
-                            <li>
-                                <a href="#">{% trans 'Ha Noi' %}</a>
-                            </li>
-                            <li>
-                                <a href="#">{% trans 'Nha Trang' %}</a>
-                            </li>
-                            <li>
-                                <a href="#">{% trans 'Ho Chi Minh' %}</a>
-                            </li>
-                            <li>
-                                <a href="#">{% trans 'Phu Quoc' %}</a>
-                            </li>
-                        </ul>
-                    </aside>
+                                <button class="button rounded-0 primary-bg text-white w-100 btn_1 boxed-btn"
+                                        type="submit">Search
+                                </button>
+                            </form>
+                        </aside>
+{#                        <aside class="single_sidebar_widget post_category_widget">#}
+{#                            <h4 class="widget_title">Category</h4>#}
+{#                            <ul class="list cat-list">#}
+{#                                <li>#}
+{#                                    <a href="#" class="d-flex">#}
+{#                                        <p>Resaurant food</p>#}
+{#                                        <p>(37)</p>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                            </ul>#}
+{#                        </aside>#}
+                        <aside class="single_sidebar_widget tag_cloud_widget">
+                            <h4 class="widget_title">Tag Clouds</h4>
+                            <ul class="list">
 
+                                {% with review.tour.tag_set.all as tag_list %}
+                                {% for tag in tag_list %}
+                                    <li>
+                                    <a href="#">{{tag.tag_name}}</a>
+                                </li>
+                                {% endfor %}
+                            {% endwith %}
+
+                            </ul>
+                        </aside>
+
+                    </div>
                 </div>
-            </div>
         </div>
     </div>
 </section>
@@ -186,7 +166,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="section_title text-center mb_70">
-                    <h3>{% trans 'More places' %}</h3>
+                    <h3>{% trans 'More games' %}</h3>
                 </div>
             </div>
         </div>
@@ -203,16 +183,11 @@
                         <a href="{{ sg_tour.get_absolute_url }}">
                             <h3>{{ sg_tour.title }}</h3>
                         </a>
-                        <p>{{ sg_tour.start_location }} - {{ sg_tour.destination }}</p>
                         <div class="rating_days d-flex justify-content-between">
                             <span class="d-flex justify-content-center align-items-center">
                                 <i class="fa fa-star"> {{ sg_tour.rating }}</i>
                                 <a href="#">{{ sg_tour.review_set.count }} {% trans 'reviews' %}</a>
                             </span>
-                            <div class="days">
-                                <i class="fa fa-clock-o"></i>
-                                <a href="#"> {{ sg_tour.date }}</a>
-                            </div>
                         </div>
                     </div>
                 </div>

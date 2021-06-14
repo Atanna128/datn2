@@ -3,6 +3,7 @@ from django.urls import reverse
 from ..models import Profile, User, Review, Tour, Booking
 from django.utils import timezone
 
+
 class ReviewListViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -19,7 +20,6 @@ class ReviewListViewTest(TestCase):
     def test_reviews_view_url_exists_at_desired_location(self):
         response = self.client.get('/reviews')
         self.assertEqual(response.status_code, 302)
-
 
     def test_review_view_url_exists_at_desired_location(self):
         response = self.client.get('/review/1')

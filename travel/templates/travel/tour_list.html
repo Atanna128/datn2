@@ -5,13 +5,12 @@
 
 
     <!-- bradcam_area  -->
-    <div class="bradcam_area bradcam_bg_2">
+    <div class="bradcam_area" style="background-image: url(../../../media/images/wallpaper.jpg); height: auto">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
                     <div class="bradcam_text text-center">
-                        <h3>Destinations</h3>
-                        <p>Where ever you want to go to, we can serve it</p>
+                        <h3>Let find out what is your favorite game</h3>
                     </div>
                 </div>
             </div>
@@ -19,37 +18,40 @@
     </div>
     <!--/ bradcam_area  -->
 
-    <!-- where_togo_area_start  -->
+    <!-- searching function  -->
     <div class="where_togo_area">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-3">
-                    <div class="form_area">
-                        <h3>Where you want to go?</h3>
-                    </div>
+{#                    <div class="form_area">#}
+{#                        <h3>Search </h3>#}
+{#                    </div>#}
                 </div>
-
-                <div class="col-lg-9">
+                <div class="col-lg-12">
                     <div class="search_wrap">
                         <form class="search_form" action="{% url 'tours' %}" method="get">
                             <div class="input_field">
-                                <input name="place" type="text" placeholder="Place" value="">
+                                <input name="name" type="text" placeholder="Game name" value="">
                             </div>
                             <div class="input_field">
-                                <select name="duration">
-                                    <option data-display="Duration" value="0" selected>Duration</option>
-                                    <option value="1" > 1</option>
-                                    <option value="2"> 2</option>
-                                    <option value="3"> 3</option>
-                                    <option value="4"> 4</option>
+                                <input name="tag" type="text" placeholder="Game tag" value="">
+                            </div>
+                            <div class="input_field">
+                                <select name="rating">
+                                    <option data-display="Rating" value="0" selected>Rating</option>
+                                    <option value="1" > 1+</option>
+                                    <option value="2"> 2+</option>
+                                    <option value="3"> 3+</option>
+                                    <option value="4"> 4+</option>
                                 </select>
                             </div>
                             <div class="input_field">
-                                <select name="cost">
-                                    <option data-display="Cost" value="0">Cost</option>
+                                <select name="price">
+                                    <option data-display="Price" value="0" selected>Price</option>
+                                    <option value="100"> <100$</option>
+                                    <option value="200"> <200$</option>
                                     <option value="500"> <500$</option>
-                                    <option value="2000"> <2000$</option>
-                                    <option value="5000"> <2000$</option>
+                                    <option value="501"> >500$</option>
                                 </select>
                             </div>
                             <div class="search_btn">
@@ -72,7 +74,7 @@
                         {% if tour_list %}
                             {% for tour in tour_list %}
                                 <div class="col-lg-4 col-md-4">
-                                    <div class="single_place">
+                                    <div class="single_place" style="background-color: #dfe8f5">
                                         <div class="thumb">
                                             {% with tour.image_set.all|first as image %}
                                                 <img src="../../../media/{{ image.url }}">
@@ -102,7 +104,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="more_place_btn text-center">
-                                <a class="boxed-btn4" href="#">More Places</a>
+                                <a class="boxed-btn4" href="#">More Games</a>
                             </div>
                         </div>
                     </div>

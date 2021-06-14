@@ -3,6 +3,8 @@ from django.test import TestCase
 from ..models import Review, Tour, User
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+
 # from datetime import date, datetime
 # Create your tests here.
 

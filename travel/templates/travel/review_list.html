@@ -1,7 +1,9 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-
+{#{% with review.tour.image_set.all|first as image %}#}
+{#                        <img class="img-fluid" src="../../../media/{{ image.url }}" alt="">#}
+{#                        {% endwith %}#}
 
     <!--================Blog Area =================-->
     <section class="blog_area single-post-area section-padding">
@@ -11,7 +13,9 @@
                     {% for review in page_obj %}
                         <article class="blog_item">
                             <div class="blog_item_img">
-                                <img class="card-img rounded-0" src="../../..{{ review.picture.url }}" alt="">
+                                {% with review.tour.image_set.all|first as image %}
+                                <img class="card-img rounded-0" src="../../../media/{{ image.url }}" alt="">
+                                {% endwith %}
                                 <a href="#" class="blog_item_date">
                                     <p>{{ review.create_date.date }}</p>
                                 </a>
@@ -23,7 +27,7 @@
                                 </a>
 
                                 <ul class="">
-                                    <li class=><a href="#"><i class="fa fa-user"></i> Travel, Lifestyle</a></li>
+                                    <li class=><a href="#"><i class="fa fa-user"></i> {{ review.user }}</a></li>
                                     <li><p><i class="fa fa-comments"></i>
                                         {% if review.comment_set.count < 2 %}
                                             {{ review.comment_set.count }} comment
@@ -76,55 +80,25 @@
                                 </button>
                             </form>
                         </aside>
-                        <aside class="single_sidebar_widget post_category_widget">
-                            <h4 class="widget_title">Category</h4>
-                            <ul class="list cat-list">
-                                <li>
-                                    <a href="#" class="d-flex">
-                                        <p>Resaurant food</p>
-                                        <p>(37)</p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="d-flex">
-                                        <p>Travel news</p>
-                                        <p>(10)</p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="d-flex">
-                                        <p>Travel abroad</p>
-                                        <p>(03)</p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="d-flex">
-                                        <p>domestic tourism</p>
-                                        <p>(11)</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </aside>
-                        <aside class="single_sidebar_widget tag_cloud_widget">
-                            <h4 class="widget_title">Tag Clouds</h4>
-                            <ul class="list">
-                                <li>
-                                    <a href="#">Ha Long</a>
-                                </li>
-                                <li>
-                                    <a href="#">Ha Noi</a>
-                                </li>
-                                <li>
-                                    <a href="#">Nha Trang</a>
-                                </li>
-                                <li>
-                                    <a href="#">Ho Chi Minh</a>
-                                </li>
-                                <li>
-                                    <a href="#">Phu Quoc</a>
-                                </li>
-                            </ul>
-                        </aside>
+{#                        <aside class="single_sidebar_widget post_category_widget">#}
+{#                            <h4 class="widget_title">Category</h4>#}
+{#                            <ul class="list cat-list">#}
+{#                                <li>#}
+{#                                    <a href="#" class="d-flex">#}
+{#                                        <p>Resaurant food</p>#}
+{#                                        <p>(37)</p>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                            </ul>#}
+{#                        </aside>#}
+{#                        <aside class="single_sidebar_widget tag_cloud_widget">#}
+{#                            <h4 class="widget_title">Tag Clouds</h4>#}
+{#                            <ul class="list">#}
+{#                                <li>#}
+{#                                    <a href="#">Ha Long</a>#}
+{#                                </li>#}
+{#                            </ul>#}
+{#                        </aside>#}
 
                     </div>
                 </div>

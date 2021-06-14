@@ -40,14 +40,11 @@ def save_user_profile(sender, instance, **kwargs):
 class Tour(models.Model):
     """Mode representing a tour."""
     title = models.CharField(max_length=200)
-    destination = models.CharField(max_length=200)
-    start_location = models.CharField(max_length=200)
-    date = models.IntegerField(default=1)
+    publisher = models.CharField(max_length=200, default="")
+    publish_date = models.DateField(null=True, blank=True)
     content = models.TextField(max_length=1000, help_text="Enter Description ")
-    place = models.CharField(max_length=200, help_text="places in tour", null=True, blank=True)
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     rating = models.FloatField()
-
     class Meta:
         ordering = ['-rating']
 
@@ -60,12 +57,18 @@ class Tour(models.Model):
         return reverse('tour-detail', args=[str(self.id)])
 
 
+class Tag(models.Model):
+    game = models.ForeignKey('Tour', on_delete=models.CASCADE)
+    tag_name = models.CharField(max_length=20, help_text="tag of the game")
+
+
 class Image(models.Model):
     """Model representing Image"""
     tour = models.ForeignKey('Tour', on_delete=models.CASCADE)
-    count = str(Tour.objects.count() + 1)
-    url = models.ImageField(upload_to='images/tours/' + count)
+    url = models.ImageField(upload_to='images/tours/')
     description = models.CharField(max_length=100, help_text="Description for images")
+
+
 
 
 class Voting(models.Model):
@@ -113,10 +116,9 @@ class Review(models.Model):
     """Model representing reviews"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tour = models.ForeignKey('Tour', on_delete=models.CASCADE)
-    title = models.TextField(max_length=100, help_text='One word about your trip !', )
+    title = models.TextField(max_length=100, help_text='What do you thing about this game!', )
     content = models.TextField(max_length=1000, help_text="Enter your feeling", null=True, blank=True)
     rating = models.IntegerField(help_text=" Enter 1 - 5")
-    picture = models.ImageField(upload_to='images/reviews', null=True, blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:

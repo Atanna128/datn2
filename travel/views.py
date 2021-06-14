@@ -23,6 +23,26 @@ from django.core.paginator import Paginator
 from asgiref.sync import async_to_sync
 import json
 from channels.layers import get_channel_layer
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.core.mail import send_mail
+from .forms import SignupForm
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from .tokens import account_activation_token
+from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
+from django.core import serializers
+from django.db.models import Count
+import json
+import os
+import environ
+
+
 # Create your views here.
 
 
@@ -47,12 +67,14 @@ def follow(request, pk):
         if (Follower.objects.filter(follower=request.user, following=tuser)):
             Follower.objects.filter(follower=request.user, following=tuser).delete()
             is_followed = 0
-            activity = Activity(user=request.user, acti="now unfollow user" + tuser.username, url = tuser.profile.get_absolute_url())
+            activity = Activity(user=request.user, acti="now unfollow user" + tuser.username,
+                                url=tuser.profile.get_absolute_url())
         else:
             follow = Follower(follower=request.user, following=tuser)
             follow.save()
             is_followed = 1
-            activity = Activity(user=request.user, acti="now follow user" + tuser.username, url = tuser.profile.get_absolute_url())
+            activity = Activity(user=request.user, acti="now follow user" + tuser.username,
+                                url=tuser.profile.get_absolute_url())
         review_num = Review.objects.filter(user=tuser).count()
         activity.save()
 
@@ -60,27 +82,27 @@ def follow(request, pk):
                       {'user': tuser, 'is_followed': is_followed, 'review_num': review_num})
     else:
         url = request.META.get('HTTP_REFERER')
-        return  HttpResponseRedirect(url)
+        return HttpResponseRedirect(url)
 
-from django.core import serializers
-from django.db.models import Count
-import json
+
 # @login_required
 def get_notification(request):
     user = User.objects.get(username=str(request.user))
     notifications = Notification.objects.filter(user=user, status=1)
-    notification_list = [ i for i in notifications.values('pk', 'action', 'action_model_id', 'action_user', 'user')]
+    notification_list = [i for i in notifications.values('pk', 'action', 'action_model_id', 'action_user', 'user')]
     for i, notification in enumerate(notification_list):
         notification['action_username'] = notifications[i].action_user.username
         notification['action_type'] = notifications[i].get_action_display()
         notification['create_date'] = notifications[i].create_date.strftime('%H:%M %d-%m-%Y')
-        if int(notification['action']) == 3 :
-            notification['booking_status'] = Booking.objects.get(pk=notification['action_model_id']).get_status_display()
+        if int(notification['action']) == 3:
+            notification['booking_status'] = Booking.objects.get(
+                pk=notification['action_model_id']).get_status_display()
     message = {
-        "notifications" : notification_list
+        "notifications": notification_list
     }
     message = json.dumps(message)
     return HttpResponse(message)
+
 
 def profile(request, pk):
     is_followed = 0
@@ -116,23 +138,6 @@ def update_profile(request):
     return render(request, 'profile.html', {'form': form, 'review_num': review_num})
 
 
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as auth_login
-from django.core.mail import send_mail
-from .forms import SignupForm
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.template.loader import render_to_string
-from .tokens import account_activation_token
-from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
-
-import os
-import environ
-
 env = environ.Env()
 # reading .env file
 environ.Env.read_env()
@@ -148,7 +153,7 @@ def signup(request):
             user.profile.address = form.cleaned_data.get('address')
             user.save()
             current_site = get_current_site(request)
-            mail_subject = 'Activate your travel account.'
+            mail_subject = 'Activate your  account.'
             message = render_to_string('acc_active_email.html', {
                 'user': user,
                 'domain': current_site.domain,
@@ -160,7 +165,7 @@ def signup(request):
                 mail_subject, message, to=[to_email]
             )
             email.content_subtype = "html"
-            email.send()
+            # email.send()
             return HttpResponse('Please confirm your email address to complete the registration')
     else:
         form = SignupForm()
@@ -216,7 +221,8 @@ def create_booking(request, pk):
         else:
             messages.success(request, 'Booking success!')
             current_site = get_current_site(request)
-            html_message = render_to_string('travel/request_booking_mail.html', {'booking': booking,'domain': current_site.domain})
+            html_message = render_to_string('travel/request_booking_mail.html',
+                                            {'booking': booking, 'domain': current_site.domain})
             send_mail(
                 subject='Request booking',
                 message='{0} request booking with tour {1}'.format(request.user, tour),
@@ -238,7 +244,6 @@ from django.db.models import Avg
 
 
 def create_voting(request, pk):
-
     tour = get_object_or_404(Tour, pk=pk)
     user = User.objects.get(username=str(request.user))
     if request.method == 'POST':
@@ -259,6 +264,7 @@ def create_voting(request, pk):
             tour.save()
             messages.success(request, 'Voting success!')
         return HttpResponseRedirect(reverse('tour-detail', kwargs={'pk': tour.id}))
+
 
 def logout(request):
     auth_logout(request)
@@ -294,7 +300,8 @@ def booking_delete(request, pk):
         messages.success(request, 'Delete booking success')
         return HttpResponseRedirect(reverse('booking-history'))
 
-def booking_status(request, pk,status):
+
+def booking_status(request, pk, status):
     booking = get_object_or_404(Booking, pk=pk)
     booking.status = status
     booking.save()
@@ -306,38 +313,56 @@ class TourListView(generic.ListView):
     model = Tour
 
     def get_queryset(self):
-        place_query = self.request.GET.get('place')
-        date_query = self.request.GET.get('duration')
-        cost_query = self.request.GET.get('cost')
-        list = Tour.objects.all()
-        if place_query is not None:
-            if place_query == "":
+        name_query = self.request.GET.get('name')
+        rating_query = self.request.GET.get('rating')
+        cost_query = self.request.GET.get('price')
+        tag_query = self.request.GET.get('tag')
+        list = Tour.objects.all().order_by('-rating')
+
+        if name_query is not None:
+            if name_query == "":
                 pass
             else:
-                list = Tour.objects.filter(title__icontains=place_query)
-        if date_query is not None:
-            if date_query == 'Duration':
+                list = Tour.objects.filter(title__icontains=name_query)
+        if rating_query is not None:
+            if rating_query == 'Rating':
                 pass
-            elif date_query.isnumeric():
-                date_query = int(date_query)
-                if date_query == 0:
+            elif rating_query.isnumeric():
+                rating_query = int(rating_query)
+                if rating_query == 0:
                     pass
                 else:
-                    list = list.filter(date=date_query)
+                    list = list.exclude(rating__in=range(0, rating_query))
         if cost_query is not None:
-            if cost_query == 'Cost':
+            if cost_query == 'Price':
                 pass
             elif cost_query.isnumeric():
                 cost_query = int(cost_query)
                 if cost_query == 0:
                     pass
                 else:
-                    list = list.filter(base_price__in=range(cost_query))
+                    if cost_query == 100:
+                        list = list.filter(base_price__in=range(0, 100))
+                    if cost_query == 200:
+                        list = list.filter(base_price__in=range(99, 200))
+                    if cost_query == 500:
+                        list = list.filter(base_price__in=range(200, 500))
+                    if cost_query == 501:
+                        list = list.exclude(base_price__in=range(0, 500))
+        if tag_query is not None:
+            if tag_query == "":
+                pass
+            else:
+                tag_list = tag_query.split()
+                for tag in tag_list:
+                    list = list.filter(tag__tag_name__contains=tag)
+
         return list
+
 
 def review_list(request):
     list = Review.objects.all().order_by('-create_date')
-    suggest_tour = Tour.objects.all()[:3]
+    suggest_tour = Tour.objects.all().order_by('-rating')[:3]
     paginator = Paginator(list, 3)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -346,6 +371,7 @@ def review_list(request):
         'suggest_tour': suggest_tour,
         'page_obj': page_obj,
     }
+
     return render(request, 'travel/review_list.html', context)
 
 
@@ -369,9 +395,7 @@ def tour_detail(request, pk):
         content = request.POST.get('content', 'Default content')
         rating = request.POST.get('rating', '5')
         rating = int(rating)
-        if request.FILES.get('review-image', None) is not None:
-            picture = request.FILES['review-image']
-        review = Review(user=user, tour=model, title=title, content=content, rating=rating, picture=picture)
+        review = Review(user=user, tour=model, title=title, content=content, rating=rating)
 
         try:
             review.save()
@@ -421,9 +445,7 @@ def review_new(request, pk):
         content = request.POST.get('content', 'Default content')
         rating = request.POST.get('rating', '5')
         rating = int(rating)
-        if request.FILES.get('review-image', None) is not None:
-            picture = request.FILES['review-image']
-        review = Review(user=user, tour=tour, title=title, content=content, rating=rating, picture=picture)
+        review = Review(user=user, tour=tour, title=title, content=content, rating=rating)
 
         try:
             review.save()
@@ -432,11 +454,11 @@ def review_new(request, pk):
                 'selected_tour': selected_tour,
                 'tour_list': tour_list,
             }
-            messages.error(request, 'Booking fail')
+            messages.error(request, 'Review fail')
             return render(request, 'travel/review_new.html', context=context)
         else:
-            messages.success(request, 'Booking success!')
-            activity = Activity(user=user, acti="create a review for tour " + tour.title, url=review.get_absolute_url())
+            messages.success(request, 'Review success!')
+            activity = Activity(user=user, acti="create a review for game " + tour.title, url=review.get_absolute_url())
             activity.save()
             return HttpResponseRedirect(reverse('index'))
     else:
@@ -459,9 +481,7 @@ def create_review(request):
         content = request.POST.get('content', 'Default content')
         rating = request.POST.get('rating', '5')
         rating = int(rating)
-        if request.FILES.get('review-image', None) is not None:
-            picture = request.FILES['review-image']
-        review = Review(user=user, tour=tour, title=title, content=content, rating=rating, picture=picture)
+        review = Review(user=user, tour=tour, title=title, content=content, rating=rating)
 
         try:
             review.save()
@@ -469,11 +489,11 @@ def create_review(request):
             context = {
                 'tour_list': tour_list,
             }
-            messages.error(request, 'Booking fail')
+            messages.error(request, 'Review fail')
             return render(request, 'travel/review_new.html', context=context)
         else:
-            messages.success(request, 'Booking success!')
-            activity = Activity(user=user, acti="create a review for tour " + tour.title, url=review.get_absolute_url())
+            messages.success(request, 'Review success!')
+            activity = Activity(user=user, acti="create a review for game " + tour.title, url=review.get_absolute_url())
             activity.save()
             return HttpResponseRedirect(reverse('index'))
     else:

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tour, Image, Booking, Review, Comment, Profile, Follower, Voting, Activity, Notification
+from .models import Tour, Image, Booking, Review, Comment, Profile, Follower, Voting, Activity, Notification,Tag
 
 
 # Register your models here.
@@ -13,11 +13,15 @@ class BookingInline(admin.TabularInline):
     model = Booking
     extra = 0
 
+class TagInLine(admin.TabularInline):
+    model = Tag
+    extra = 0
+
 
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'start_location', 'destination', 'rating')
-    inlines = [ImageInline, BookingInline]
+    list_display = ('id', 'title',  'rating')
+    inlines = [ImageInline,TagInLine, BookingInline]
 
 
 class CommentInline(admin.TabularInline):
