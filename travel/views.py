@@ -309,16 +309,14 @@ def booking_status(request, pk, status):
     return HttpResponseRedirect(reverse('index'))
 
 
-class TourListView(generic.ListView):
-    model = Tour
-
-    def get_queryset(self):
-        name_query = self.request.GET.get('name')
-        rating_query = self.request.GET.get('rating')
-        cost_query = self.request.GET.get('price')
-        tag_query = self.request.GET.get('tag')
-        list = Tour.objects.all().order_by('-rating')
-
+def game_list(request):
+    # def get_queryset(self):
+    list = Tour.objects.all().order_by('-rating')
+    if request.method == 'GET':
+        name_query = request.GET.get('name')
+        rating_query = request.GET.get('rating')
+        cost_query = request.GET.get('price')
+        tag_query = request.GET.get('tag')
         if name_query is not None:
             if name_query == "":
                 pass
@@ -356,8 +354,14 @@ class TourListView(generic.ListView):
                 tag_list = tag_query.split()
                 for tag in tag_list:
                     list = list.filter(tag__tag_name__contains=tag)
-
-        return list
+    paginator = Paginator(list, 3)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'tour_list': list,
+        'page_obj': page_obj,
+    }
+    return render(request, 'travel/tour_list.html', context)
 
 
 def review_list(request):

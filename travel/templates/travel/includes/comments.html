@@ -12,7 +12,17 @@
             <div class="d-flex justify-content-between">
                 <div class="d-flex align-items-center">
                     <h5>
-                        <a href="#">{{ comment.user.username }}</a>
+{#                        <a href="">{{ comment.user.username }}</a>#}
+                         <div >
+                            {% if request.user == comment.user %}
+                                <a href="{% url 'profile' %}">
+                            {% else %}
+                                <a href="{% url 'profile-details' comment.user.id %}">
+                            {% endif %}
+                                <h4>{{ comment.user.username }}</h4>
+
+                            </a>
+                        </div>
                     </h5>
                     <p class="date">{{ comment.create_date|date:"Y-m-d" }} </p>
                 </div>

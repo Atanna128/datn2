@@ -12,7 +12,8 @@ urlpatterns = [
     path('profile/<int:pk>', views.profile, name='profile-details'),
     path('profile/<int:pk>/follow', views.follow, name='follow'),
     path('login', views.login, name='login'),
-    path('tours/', views.TourListView.as_view(), name='tours'),
+    # path('tours/', views.TourListView.as_view(), name='tours'),
+    path('tours/', views.game_list, name='tours'),
     path('tour/<int:pk>', views.tour_detail, name='tour-detail'),
 
     path('tour/<int:pk>/booking', views.create_booking, name='booking'),
